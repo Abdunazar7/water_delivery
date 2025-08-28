@@ -1,18 +1,14 @@
 const express = require("express");
 const {
-  createRegion,
-  getRegions,
-  getRegionById,
-  updateRegion,
-  deleteRegion,
-} = require("../controllers/region.controller");
+createdistrict, getdistricts, getdistrictById, updatedistrict, deletedistrict
+} = require("../controllers/district.controller");
 
 const router = express.Router();
 
-router.post("/", createRegion);
-router.get("/", getRegions);
-router.get("/:id", getRegionById);
-router.patch("/:id", updateRegion);
-router.delete("/:id", deleteRegion);
+router.post("/", createdistrict);
+router.get("/", getdistricts);
+router.get("/:id", getdistrictById);
+router.patch("/:id", updatedistrict);
+router.delete("/:id", deletedistrict);
 
 module.exports = router;

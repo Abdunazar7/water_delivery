@@ -13,6 +13,7 @@
   "dependencies": {
     "config": "^4.1.1",
     "express": "^5.1.0",
+    "node-device-detector": "^2.2.4",
     "pg": "^8.16.3"
   }
 }
