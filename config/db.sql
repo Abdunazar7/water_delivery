@@ -2,6 +2,8 @@
 
 -- Tables were created using pg admin GUI but here are scripts
 
+CREATE DATABASE water_delivery
+
 CREATE TABLE IF NOT EXISTS customers
 (
     id integer NOT NULL DEFAULT nextval('customers_id_seq'::regclass),
