@@ -1,6 +1,6 @@
 const pool = require("../config/db");
-const buildUpdateQuery = require("../helpers/buildUpdateQuery.helper");
 
+// Create
 const createDeliveryStaff = async (req, res) => {
   try {
     const { name, phone, vehicle_number, district_id } = req.body;
@@ -20,10 +20,13 @@ const createDeliveryStaff = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Internal Server Error", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
   }
 };
 
+// Get all
 const getDeliveryStaff = async (req, res) => {
   try {
     const result = await pool.query(
@@ -34,10 +37,13 @@ const getDeliveryStaff = async (req, res) => {
 
     res.json({ data: result.rows });
   } catch (error) {
-    res.status(500).json({ message: "Internal Server Error", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
   }
 };
 
+// Get one
 const getDeliveryStaffById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -50,31 +56,43 @@ const getDeliveryStaffById = async (req, res) => {
       [id]
     );
 
-    if (!result.rows.length) return res.status(404).json({ message: "Staff not found" });
+    if (!result.rows.length)
+      return res.status(404).json({ message: "Staff not found" });
 
     res.json({ data: result.rows[0] });
   } catch (error) {
-    res.status(500).json({ message: "Internal Server Error", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
   }
 };
 
-const patchDeliveryStaff = async (req, res) => {
+// Update
+const updateDeliveryStaff = async (req, res) => {
   try {
     const { id } = req.params;
-    const fields = req.body;
+    const { name, phone, vehicle_number, district_id } = req.body;
 
-    const query = buildUpdateQuery("delivery_staff", id, fields);
-    if (!query) return res.status(400).json({ message: "Nothing to update" });
+    const result = await pool.query(
+      `UPDATE delivery_staff
+       SET name=$1, phone=$2, vehicle_number=$3, district_id=$4
+       WHERE id=$5
+       RETURNING *`,
+      [name, phone, vehicle_number, district_id, id]
+    );
 
-    const updated = await pool.query(query.sql, query.values);
-    if (!updated.rows.length) return res.status(404).json({ message: "Staff not found" });
+    if (!result.rows.length)
+      return res.status(404).json({ message: "Delivery staff not found" });
 
-    res.json({ message: "Staff updated", data: updated.rows[0] });
+    res.json({ message: "Delivery staff updated", data: result.rows[0] });
   } catch (error) {
-    res.status(500).json({ message: "Internal Server Error", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
   }
 };
 
+// Delete
 const deleteDeliveryStaff = async (req, res) => {
   try {
     const { id } = req.params;
@@ -84,11 +102,14 @@ const deleteDeliveryStaff = async (req, res) => {
       [id]
     );
 
-    if (!result.rows.length) return res.status(404).json({ message: "Staff not found" });
+    if (!result.rows.length)
+      return res.status(404).json({ message: "Staff not found" });
 
     res.json({ message: "Staff deleted", data: result.rows[0] });
   } catch (error) {
-    res.status(500).json({ message: "Internal Server Error", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
   }
 };
 
@@ -96,6 +117,6 @@ module.exports = {
   createDeliveryStaff,
   getDeliveryStaff,
   getDeliveryStaffById,
-  patchDeliveryStaff,
+  updateDeliveryStaff,
   deleteDeliveryStaff,
 };

@@ -1,5 +1,4 @@
 const pool = require("../config/db");
-const buildUpdateQuery = require("../helpers/buildUpdateQuery.helper");
 
 // Create
 const createCustomer = async (req, res) => {
@@ -65,23 +64,24 @@ const getCustomerById = async (req, res) => {
 const updateCustomer = async (req, res) => {
   try {
     const { id } = req.params;
-    const fields = req.body;
+    const { name, phone, email, is_active } = req.body;
 
-    const query = buildUpdateQuery("customers", id, fields);
-    if (!query) {
-      return res.status(400).json({ message: "Nothing to update" });
-    }
+    const result = await pool.query(
+      `UPDATE customers
+       SET name=$1, phone=$2, email=$3, is_active=$4
+       WHERE id=$5
+       RETURNING *`,
+      [name, phone, email, is_active, id]
+    );
 
-    const updated = await pool.query(query.sql, query.values);
-
-    if (!updated.rows.length) {
+    if (!result.rows.length)
       return res.status(404).json({ message: "Customer not found" });
-    }
 
-    res.json({ message: "Customer updated", data: updated.rows[0] });
+    res.json({ message: "Customer updated", data: result.rows[0] });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server Error", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
   }
 };
 

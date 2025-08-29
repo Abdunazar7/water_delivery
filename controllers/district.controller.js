@@ -1,8 +1,7 @@
 const pool = require("../config/db");
-const buildUpdateQuery = require("../helpers/buildUpdateQuery.helper");
 
 // Create
-const createdistrict = async (req, res) => {
+const createDistrict = async (req, res) => {
   try {
     const { name } = req.body;
 
@@ -22,9 +21,11 @@ const createdistrict = async (req, res) => {
 };
 
 // Get all
-const getdistricts = async (req, res) => {
+const getDistricts = async (req, res) => {
   try {
-    const districts = await pool.query("SELECT * FROM districts ORDER BY id ASC");
+    const districts = await pool.query(
+      "SELECT * FROM districts ORDER BY id ASC"
+    );
     res.send(districts.rows);
   } catch (error) {
     res
@@ -33,7 +34,8 @@ const getdistricts = async (req, res) => {
   }
 };
 
-const getdistrictById = async (req, res) => {
+// Get one
+const getDistrictById = async (req, res) => {
   try {
     const { id } = req.params;
     const customer = await pool.query("SELECT * FROM districts WHERE id=$1", [
@@ -53,23 +55,32 @@ const getdistrictById = async (req, res) => {
 };
 
 // Update
-const updatedistrict = async (req, res) => {
+const updateDistrict = async (req, res) => {
   try {
     const { id } = req.params;
-    const query = buildUpdateQuery("districts", id, req.body);
-    if (!query) return res.status(400).json({ message: "Nothing to update" });
+    const { name } = req.body;
 
-    const updated = await pool.query(query.sql, query.values);
-    if (!updated.rows.length) return res.status(404).json({ message: "district not found" });
+    const result = await pool.query(
+      `UPDATE districts
+       SET name=$1
+       WHERE id=$2
+       RETURNING *`,
+      [name, id]
+    );
 
-    res.json({ message: "district updated", data: updated.rows[0] });
+    if (!result.rows.length)
+      return res.status(404).json({ message: "District not found" });
+
+    res.json({ message: "District updated", data: result.rows[0] });
   } catch (error) {
-    res.status(500).json({ message: "Internal Server Error", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
   }
 };
 
 // Delete
-const deletedistrict = async (req, res) => {
+const deleteDistrict = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -89,4 +100,10 @@ const deletedistrict = async (req, res) => {
   }
 };
 
-module.exports = { createdistrict, getdistricts, getdistrictById, updatedistrict, deletedistrict };
+module.exports = {
+  createDistrict,
+  getDistricts,
+  getDistrictById,
+  updateDistrict,
+  deleteDistrict,
+};

@@ -1,5 +1,4 @@
 const pool = require("../config/db");
-const buildUpdateQuery = require("../helpers/buildUpdateQuery.helper");
 
 // Create
 const createProduct = async (req, res) => {
@@ -40,9 +39,10 @@ const getProducts = async (req, res) => {
 const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
-    const customer = await pool.query("SELECT * FROM water_products WHERE id=$1", [
-      id,
-    ]);
+    const customer = await pool.query(
+      "SELECT * FROM water_products WHERE id=$1",
+      [id]
+    );
 
     if (!customer.rows.length) {
       return res.status(404).send({ message: "Product not found" });
@@ -60,15 +60,24 @@ const getProductById = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const query = buildUpdateQuery("water_products", id, req.body);
-    if (!query) return res.status(400).json({ message: "Nothing to update" });
+    const { name, volume_liters, price } = req.body;
 
-    const updated = await pool.query(query.sql, query.values);
-    if (!updated.rows.length) return res.status(404).json({ message: "Product not found" });
+    const result = await pool.query(
+      `UPDATE water_products
+       SET name=$1, volume_liters=$2, price=$3
+       WHERE id=$4
+       RETURNING *`,
+      [name, volume_liters, price, id]
+    );
 
-    res.json({ message: "Product updated", data: updated.rows[0] });
+    if (!result.rows.length)
+      return res.status(404).json({ message: "Water product not found" });
+
+    res.json({ message: "Water product updated", data: result.rows[0] });
   } catch (error) {
-    res.status(500).json({ message: "Internal Server Error", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
   }
 };
 
@@ -93,4 +102,10 @@ const deleteProduct = async (req, res) => {
   }
 };
 
-module.exports = { createProduct, getProducts, getProductById, updateProduct, deleteProduct };
+module.exports = {
+  createProduct,
+  getProducts,
+  getProductById,
+  updateProduct,
+  deleteProduct,
+};

@@ -16,12 +16,13 @@ CREATE TABLE customers (
 
 CREATE TABLE address (
     id SERIAL PRIMARY KEY,
+    name VARCHAR(100),
     customer_id INT NOT NULL REFERENCES customers(id)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
     address VARCHAR(200) NOT NULL,
     location VARCHAR(200),
-    region_id INT REFERENCES regions(id)
+    district_id INT REFERENCES districts(id)
         ON DELETE SET NULL
         ON UPDATE CASCADE
 );
